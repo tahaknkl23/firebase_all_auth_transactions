@@ -101,7 +101,7 @@ void CikisYap() async {
     await GoogleSignIn().signOut();
   }
   await GoogleSignIn().disconnect();
-  debugPrint("Çıkış yapıldı");
+  debugPrint("Çikis yapildi");
 }
 
 void loginPhoneNumber() async {

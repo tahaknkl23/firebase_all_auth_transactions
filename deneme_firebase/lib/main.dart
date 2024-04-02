@@ -1,5 +1,5 @@
-import 'package:deneme_firebase/auth.dart';
 import 'package:deneme_firebase/firebase_options.dart';
+import 'package:deneme_firebase/firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const Auth(),
+      home: FireStore(),
     );
   }
 }
