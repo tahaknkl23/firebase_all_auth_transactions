@@ -57,6 +57,11 @@ class _AuthState extends State<Auth> {
                   CikisYap();
                 },
                 child: const Text('gogle çikis')),
+            ElevatedButton(
+                onPressed: () {
+                  loginPhoneNumber();
+                },
+                child: const Text("Phone Auth")),
           ],
         ),
       ),
@@ -97,4 +102,27 @@ void CikisYap() async {
   }
   await GoogleSignIn().disconnect();
   debugPrint("Çıkış yapıldı");
+}
+
+void loginPhoneNumber() async {
+  await FirebaseAuth.instance.verifyPhoneNumber(
+    phoneNumber: '+90 5056319454',
+    verificationCompleted: (PhoneAuthCredential credential) {
+      debugPrint(credential.smsCode.toString());
+      FirebaseAuth.instance.signInWithCredential(credential);
+    },
+    verificationFailed: (FirebaseAuthException e) {
+      debugPrint(e.message);
+    },
+    codeSent: (String verificationId, int? resendToken) {
+      debugPrint(verificationId);
+      String smsCode = '123456';
+      debugPrint("code sent tetiklendi");
+      var credential = PhoneAuthProvider.credential(verificationId: verificationId, smsCode: smsCode);
+      FirebaseAuth.instance.signInWithCredential(credential);
+    },
+    codeAutoRetrievalTimeout: (String verificationId) {
+      debugPrint(verificationId);
+    },
+  );
 }
