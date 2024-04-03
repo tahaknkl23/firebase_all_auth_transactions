@@ -1,7 +1,10 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 class FireStore extends StatefulWidget {
   const FireStore({super.key});
@@ -72,7 +75,12 @@ class _FireStoreState extends State<FireStore> {
                 onPressed: () {
                   queryingData();
                 },
-                child: const Text("Querying Data"))
+                child: const Text("Querying Data")),
+            ElevatedButton(
+                onPressed: () {
+                  kameraGaleriImageUpload();
+                },
+                child: const Text("Kamera ve galeri image upload")),
           ],
         ),
       ),
@@ -262,6 +270,26 @@ queryingData() async {
     debugPrint(user.data().toString());
   }
 }
+
+kameraGaleriImageUpload() async {
+  final ImagePicker picker = ImagePicker();
+
+  XFile? file = await picker.pickImage(source: ImageSource.gallery);
+  var profilRef = FirebaseStorage.instance.ref('users/profil_resimleri');
+  var task = profilRef.putFile(File(file!.path));
+  task.whenComplete(() async {
+    var url = await profilRef.getDownloadURL();
+    _firestore.doc("users/UgjRtOuZuYuzpKKx5pR0").update({'profilResmi': url});
+    debugPrint(url);
+  });
+}
+
+
+
+
+
+
+
 
 //bir veritabani kullanamak için gerekli olan şeyler
 //verilerin güvenli olması 
