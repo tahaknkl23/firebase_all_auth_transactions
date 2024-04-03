@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
@@ -8,6 +10,7 @@ class FireStore extends StatefulWidget {
   State<FireStore> createState() => _FireStoreState();
 }
 
+StreamSubscription? _userSubsribe;
 final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
 class _FireStoreState extends State<FireStore> {
@@ -48,7 +51,13 @@ class _FireStoreState extends State<FireStore> {
                 onPressed: () {
                   veriUpdateSil();
                 },
-                child: const Text("veriUpdateSil"))
+                child: const Text("veriUpdateSil")),
+            ElevatedButton(
+                onPressed: () {
+                  //veriOkumaTime();
+                  veriOkumaRealTimeOneUsers();
+                },
+                child: const Text("Veri Okuma Time")),
           ],
         ),
       ),
@@ -113,4 +122,57 @@ veriUpdateSil() async {
       "aaaaa": FieldValue.delete(),
     },
   );
+}
+
+//bir kerelik çalışıyor
+veriOkumaTime() async {
+  var usersDocuments = await _firestore.collection("users").get();
+  debugPrint(usersDocuments.size.toString());
+  debugPrint(usersDocuments.docs.length.toString()); //bu şekilde de döküman sayısını alabiliriz
+  for (var eleman in usersDocuments.docs) {
+    debugPrint("Dokuman id: ${eleman.id}");
+    Map userMap = eleman.data();
+    debugPrint(userMap["isim"]);
+
+    var emreDoc = await _firestore.doc("users/y98oFDi7OZ6l12CFPVUR").get();
+    debugPrint("emreDoc: ${emreDoc.data().toString()}");
+  }
+}
+
+veriOkumaRealTime() async {
+  var userStream = _firestore.collection("users").snapshots();
+  _userSubsribe = userStream.listen((event) {
+    userStream.forEach((element) {
+      // for (var element in element.docChanges) {
+      //   debugPrint(element.doc.data().toString());
+      // }
+      for (var element in element.docs) {
+        debugPrint(element.data().toString());
+      }
+    });
+  });
+}
+
+veriOkumaRealTimeOneUsers() async {
+  // var userStream = _firestore.collection("users").snapshots();
+  var userDocStream = _firestore.doc("users/UgjRtOuZuYuzpKKx5pR0").snapshots();
+
+  _userSubsribe = userDocStream.listen((event) {
+    userDocStream.forEach((element) {
+      //bu şekilde sadece bir kullanıcıyı dinleyebiliriz
+      // for (var element in element.docChanges) {
+      //   debugPrint(element.doc.data().toString());
+      // }
+      //bu şekilde tüm kullanıcıları dinleyebiliriz
+
+      debugPrint(event.data().toString());
+    });
+  });
+}
+
+streamDurdur() async {
+  await _userSubsribe?.cancel();
+}
+batchKavrami{
+  
 }
