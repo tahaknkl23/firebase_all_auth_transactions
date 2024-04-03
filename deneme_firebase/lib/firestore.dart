@@ -58,6 +58,12 @@ class _FireStoreState extends State<FireStore> {
                   veriOkumaRealTimeOneUsers();
                 },
                 child: const Text("Veri Okuma Time")),
+            ElevatedButton(
+                onPressed: () {
+                  batchKavrami();
+                },
+                child: const Text("Batch Kavrami")),
+            ElevatedButton(onPressed: () {}, child: const Text("Transaction Kavrami"))
           ],
         ),
       ),
@@ -139,6 +145,7 @@ veriOkumaTime() async {
   }
 }
 
+// sürekli çalışıyor
 veriOkumaRealTime() async {
   var userStream = _firestore.collection("users").snapshots();
   _userSubsribe = userStream.listen((event) {
@@ -153,13 +160,13 @@ veriOkumaRealTime() async {
   });
 }
 
+// sürekli çalışıyor sadece bir kullanıcıyı dinler
 veriOkumaRealTimeOneUsers() async {
   // var userStream = _firestore.collection("users").snapshots();
   var userDocStream = _firestore.doc("users/UgjRtOuZuYuzpKKx5pR0").snapshots();
 
   _userSubsribe = userDocStream.listen((event) {
     userDocStream.forEach((element) {
-      //bu şekilde sadece bir kullanıcıyı dinleyebiliriz
       // for (var element in element.docChanges) {
       //   debugPrint(element.doc.data().toString());
       // }
@@ -170,9 +177,34 @@ veriOkumaRealTimeOneUsers() async {
   });
 }
 
+// dinlemeyi durdurmak için
 streamDurdur() async {
   await _userSubsribe?.cancel();
 }
-batchKavrami{
-  
+
+//batch kavramı birden fazla işlemi aynı anda yapmamızı sağlar
+batchKavrami() async {
+  WriteBatch batch = _firestore.batch();
+  CollectionReference counterColRef = _firestore.collection('counter');
+
+  //batc ile aynı anda 100 tane dokuman ekleyebiliriz
+  // for (int i = 0; i < 100; i++) {
+  //   var yeniDocId = counterColRef.doc();
+  //   batch.set(yeniDocId, {'sayac': ++i, 'docId': yeniDocId.id});
+  // }
+
+//batch ile aynı anda timestamp ekleyebiliriz
+  // var counterDocs = await counterColRef.get();
+  // for (var element in counterDocs.docs) {
+  //   batch.update(element.reference, {'createdAt': FieldValue.serverTimestamp()});
+  // }
+
+  //batch ile aynı anda silme işlemi yapabiliriz
+  var counterDocs = await counterColRef.get();
+  for (var element in counterDocs.docs) {
+    batch.delete(element.reference);
+  }
+
+  await batch.commit();
 }
+
