@@ -34,6 +34,21 @@ class _FireStoreState extends State<FireStore> {
                   veriEklemeSet();
                 },
                 child: const Text('Veri Ekle Set')),
+            ElevatedButton(
+                onPressed: () {
+                  veriGuncelleme();
+                },
+                child: const Text("Veri Güncelle")),
+            ElevatedButton(
+                onPressed: () {
+                  veriSil();
+                },
+                child: const Text("Veri Sil")),
+            ElevatedButton(
+                onPressed: () {
+                  veriUpdateSil();
+                },
+                child: const Text("veriUpdateSil"))
           ],
         ),
       ),
@@ -74,4 +89,28 @@ veriEklemeSet() async {
   });
 
   await _firestore.doc("users/UgjRtOuZuYuzpKKx5pR0").set({"okul": "Ege Universitesi", "yas": FieldValue.increment(1)}, SetOptions(merge: true));
+}
+
+veriSil() {
+  _firestore.doc("users/4cAG0MXFK5cyllnlfybQPC15kzP2").delete();
+}
+
+veriGuncelleme() async {
+  await _firestore.doc("users/UgjRtOuZuYuzpKKx5pR0").update(
+    {
+      "isim": "güncel emre",
+      "soyisim": "kaya",
+      "ogrenciMi": true,
+      "aaaaa": false,
+      "adres.il": "izmir yeni ilce",
+    },
+  );
+}
+
+veriUpdateSil() async {
+  await _firestore.doc("users/UgjRtOuZuYuzpKKx5pR0").update(
+    {
+      "aaaaa": FieldValue.delete(),
+    },
+  );
 }
