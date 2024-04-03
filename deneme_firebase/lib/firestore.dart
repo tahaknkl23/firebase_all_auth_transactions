@@ -63,7 +63,16 @@ class _FireStoreState extends State<FireStore> {
                   batchKavrami();
                 },
                 child: const Text("Batch Kavrami")),
-            ElevatedButton(onPressed: () {}, child: const Text("Transaction Kavrami"))
+            ElevatedButton(
+                onPressed: () {
+                  transactionKavrami();
+                },
+                child: const Text("Transaction Kavrami")),
+            ElevatedButton(
+                onPressed: () {
+                  queryingData();
+                },
+                child: const Text("Querying Data"))
           ],
         ),
       ),
@@ -208,3 +217,54 @@ batchKavrami() async {
   await batch.commit();
 }
 
+transactionKavrami() async {
+  _firestore.runTransaction((transaction) async {
+    //emrenin bakiyesini ögren
+    //emrenin bakiyesini 100 düş
+    //mahmuta 100 ekle
+
+    //burda emre ve mahmutun idlerini kullanarak işlem yapabiliriz
+    DocumentReference emre = _firestore.doc("users/y98oFDi7OZ6l12CFPVUR").get() as DocumentReference;
+    DocumentReference mahmut = _firestore.doc("users/jHK3U50QXuoQ5Jv4e35t").get() as DocumentReference;
+
+    //emre ve mahmutun bakiyelerini öğrenmek için snapshot alıyoruz
+    var emreSnapshot = (await transaction.get(emre));
+    var emreBakiye = (emreSnapshot.data() as Map<String, dynamic>)['para'];
+
+    //emrenin bakiyesi 100 den büyükse işlemi yap yoksa hata fırlat
+    if (emreBakiye >= 100) {
+      // emrenin bakiyesinden 100 çıkarıp mahmuta 100 ekliyoruz
+      var yeniBakiye = (emreSnapshot.data() as Map<String, dynamic>)['para'] - 100;
+      transaction.update(emre, {'para': yeniBakiye});
+
+      //mahmutun bakiyesine 100 ekliyoruz FieldValue.increment(100) ile
+      transaction.update(mahmut, {'para': FieldValue.increment(100)});
+    } else {
+      throw Exception("Yetersiz bakiye");
+    }
+  });
+}
+
+//verileri filtreleyebilmek ve sorgulayabilmek
+//örneğin yaşa göre sorgulama yapmak
+queryingData() async {
+  var userRef = _firestore.collection("users");
+  var sonuc = await userRef.where('renkeler', arrayContains: 'mavi').get();
+  for (var user in sonuc.docs) {
+    debugPrint(user.data().toString());
+  }
+  var sirala = await userRef.orderBy('yas', descending: true).get();
+  for (var user in sirala.docs) {
+    debugPrint(user.data().toString());
+  }
+  var stringSearch = await userRef.orderBy('email').startAt(['emre']).endAt(['emre' '\uf8ff']).get();
+  for (var user in stringSearch.docs) {
+    debugPrint(user.data().toString());
+  }
+}
+
+//bir veritabani kullanamak için gerekli olan şeyler
+//verilerin güvenli olması 
+// verileri yazabilmek
+// verileri okuyabilmek
+//verileri filtreleyebilmek ve sorgulayabilmek
